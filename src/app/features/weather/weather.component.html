@@ -1,0 +1,97 @@
+<div class="weather-app">
+
+  <!-- BÚSQUEDA -->
+  <div class="search-section">
+    <h1>🌍 Weather Explorer</h1>
+    <div class="search-wrapper">
+      <input
+        type="text"
+        [(ngModel)]="cityQuery"
+        (keydown)="onKeyDown($event)"
+        placeholder="Buscar ciudad... ej: Tokyo, Hermosillo, Paris"
+        class="search-input"
+      />
+      <button (click)="search()" class="search-btn">Buscar</button>
+    </div>
+
+    <!-- Búsquedas recientes (caché) -->
+    @if (recentSearches.length > 0) {
+      <div class="recent-searches">
+        <span class="recent-label">Recientes:</span>
+        @for (city of recentSearches; track city) {
+          <button class="recent-tag" (click)="search(city)">{{ city }}</button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- SPINNER -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando clima...</p>
+    </div>
+  }
+
+  <!-- ERROR -->
+  @if (errorMessage()) {
+    <div class="error-box">
+      <span class="error-icon">⚠️</span>
+      <div>
+        <strong>Error</strong>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- CLIMA ACTUAL -->
+  @if (current(); as weather) {
+    <div class="weather-card">
+      <div class="hero" [class]="getHeroClass(weather.weather[0].main)">
+        <div class="hero-left">
+          <div class="city-name">{{ weather.name }}, {{ weather.sys.country }}</div>
+          <div class="temp-big">{{ weather.main.temp | kelvinToCelsius }}°C</div>
+          <div class="description">{{ weather.weather[0].description }}</div>
+        </div>
+        <div class="hero-icon">{{ getWeatherIcon(weather.weather[0].id) }}</div>
+      </div>
+
+      <div class="weather-meta">
+        <div class="meta-item">
+          <span class="meta-label">Sensación</span>
+          <span class="meta-value">{{ weather.main.feels_like | kelvinToCelsius }}°C</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Humedad</span>
+          <span class="meta-value">{{ weather.main.humidity }}%</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Viento</span>
+          <span class="meta-value">{{ getWindKph(weather.wind.speed) }} km/h</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Presión</span>
+          <span class="meta-value">{{ weather.main.pressure }} hPa</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRONÓSTICO 5 DÍAS -->
+    @if (forecast().length > 0) {
+      <div class="forecast-section">
+        <h3 class="forecast-title">Pronóstico 5 días</h3>
+        <div class="forecast-grid">
+          @for (day of forecast(); track day.dt) {
+            <div class="forecast-day">
+              <div class="forecast-day-name">{{ day.dayName }}</div>
+              <div class="forecast-icon">{{ getWeatherIcon(day.weatherId) }}</div>
+              <div class="forecast-max">{{ day.tempMax | kelvinToCelsius }}°</div>
+              <div class="forecast-min">{{ day.tempMin | kelvinToCelsius }}°</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+
+</div>
